@@ -1,25 +1,48 @@
-var csv = require('csv');
-var fs = require('fs');
-var calculateDate = require('./calculateDate')
+const csv = require('csv');
+const fs = require('fs');
+const calculateDate = require('./calculateDate')
 
-var parse = csv.parse;
-var csv = fs.readFileSync('test.csv');
+const parse = csv.parse;
+const inputFile = fs.readFileSync('testData/test.csv');
+
+
+const options = {
+    columns: true
+};
+
+const startDate = new Date('July 15, 2019')
 
 var output = [];
 
-var options = {
-    // columns: true
-};
-
-parse(csv, options).on('readable', function () {
-    let record;
+parse(inputFile, options).on('readable', function () {
+    let record, week, day, eventDate;
     while (record = this.read()) {
-        output.push(record.map(x => x.trim()))
+        // Expect format like "Week":"Week 01"
+        week = record['Week'] ? record['Week'].split(' ')[1] : week;
+        if (record['Day'] && +record['Day'] !== day) { // only calculate date if day changed
+            day = +record['Day'];
+            eventDate = calculateDate(startDate, week, day).toLocaleDateString();
+        }
+
+        setStartAndEndDate(record, eventDate);
+        setStartAndEndTime(record);
+        output.push(record)
     }
-    fs.writeFileSync('testNoColumn.json', JSON.stringify(output))
+    fs.writeFileSync('testData/test.json', JSON.stringify(output))
 });
 
 // change header names 
 
 // start and end date always the same  
 // format time 
+
+function setStartAndEndDate(row, date) {
+    row['Start Date'] = date;
+    row['End Date'] = date;
+    delete row['Week'];
+    delete row['Day'];
+}
+
+function setStartAndEndTime(row) {
+
+}

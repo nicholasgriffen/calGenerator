@@ -10,12 +10,9 @@ function calculateDate(startDate, week, day) {
     var weekModifier = (week - 1) * 7 * millisecondsInDay;
     var dayModifier = (day - 1) * millisecondsInDay;
 
-    try {
-        var date = new Date(startDate.getTime() + weekModifier + dayModifier)
-        return date;
-    } catch (e) {
-        console.error('Date calculation failed with ' + e)
-    }
+    var date = new Date(startDate.getTime() + weekModifier + dayModifier)
+
+    return date;
 }
 
 module.exports = calculateDate
