@@ -1,24 +1,36 @@
-const csv = require('csv');
+const { parse, stringify } = require('csv');
 const fs = require('fs');
-const calculateDate = require('./calculateDate')
+const { calculateDate, formatTimes } = require('./timeUtils')
 
-const parse = csv.parse;
 const inputFile = fs.readFileSync('testData/test.csv');
 
 
-const options = {
+const parseOptions = {
     columns: true,
     rtrim: true,
-    ltrime: true
+    ltrim: true
 };
+
+const stringifyOptions = {
+    header: true,
+    columns: ["Start Date", "End Date", "Start Time", "End Time", "Subject", "Description"]
+}
 
 const startDate = new Date('July 15, 2019')
 
 var output = [];
 
-parse(inputFile, options).on('readable', function () {
-    let record, week, day, eventDate;
-    while (record = this.read()) {
+parse(inputFile, parseOptions).on('readable', function () {
+    var convertedFile = convertToGoogleCalendarCsv(this);
+    stringify(convertedFile, stringifyOptions, function (err, data) {
+        fs.writeFileSync('testData/newTest.csv', data);
+    })
+});
+
+function convertToGoogleCalendarCsv(stream) {
+    let record, week, day, eventDate, row;
+    while (record = stream.read()) {
+        row = {}
         week = record['Week'] ? record['Week'].split(' ')[1] : week; // Expect format like "Week":"Week 01"
 
         if (record['Day'] && +record['Day'] !== day) { // only calculate date if day changed
@@ -26,13 +38,14 @@ parse(inputFile, options).on('readable', function () {
             eventDate = calculateDate(startDate, week, day).toLocaleDateString();
         }
 
-        setStartAndEndDate(record, eventDate);
-        setStartAndEndTime(record);
-        output.push(record)
+        setStartAndEndDate(row, eventDate);
+        setStartAndEndTime(row, record);
+        setSubject(row, record);
+        setDescription(row, record);
+        output.push(row)
     }
-    fs.writeFileSync('testData/test.json', JSON.stringify(output))
-});
-
+    return output;
+}
 function setStartAndEndDate(row, date) {
     row['Start Date'] = date;
     row['End Date'] = date;
@@ -40,6 +53,16 @@ function setStartAndEndDate(row, date) {
     delete row['Day'];
 }
 
-function setStartAndEndTime(row) {
+function setStartAndEndTime(row, record) {
+    var [start, end] = formatTimes(record)
+    row['Start Time'] = start;
+    row['End Time'] = end;
+}
 
+function setSubject(row, record) {
+    row['Subject'] = record['Type']
+}
+
+function setDescription(row, record) {
+    row['Description'] = record['Lecture / Activity / Exercise']
 }
