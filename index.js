@@ -33,7 +33,10 @@ function convertToGoogleCalendarCsv(stream) {
         row = {}
         week = record['Week'] ? record['Week'].split(' ')[1] : week; // Expect format like "Week":"Week 01"
 
-        if (record['Day'] && +record['Day'] !== day) { // only calculate date if day changed
+        if (record['Day'] && +record['Day'] !== day) {
+            // only calculate date if day changed
+            // assume that record with empty day occurs 
+            // on same day as the last record that had a day
             day = +record['Day'];
             eventDate = calculateDate(startDate, week, day).toLocaleDateString();
         }
