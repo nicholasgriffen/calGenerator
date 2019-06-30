@@ -1,55 +1,58 @@
-// BEFORE RUNNING:
-// ---------------
-// 1. If not already done, enable the Google Sheets API
-//    and check the quota for your project at
-//    https://console.developers.google.com/apis/api/sheets
-// 2. Install the Node.js client library by running
-//    `npm install googleapis --save`
-
 const { google } = require('googleapis');
-var sheets = google.sheets('v4');
+const fs = require('fs')
+const sheets = google.sheets('v4');
 
-authorize(function (authClient) {
-    var request = {
-        // The spreadsheet to request.
-        spreadsheetId: 'my-spreadsheet-id',  // TODO: Update placeholder value.
 
-        // The ranges to retrieve from the spreadsheet.
-        ranges: [],  // TODO: Update placeholder value.
+const SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
+const TOKEN_PATH = 'token.json';
 
-        // True if grid data should be returned.
-        // This parameter is ignored if a field mask was set in the request.
-        includeGridData: false,  // TODO: Update placeholder value.
-
-        auth: authClient,
-    };
-
-    sheets.spreadsheets.get(request, function (err, response) {
-        if (err) {
-            console.error(err);
-            return;
-        }
-
-        // TODO: Change code below to process the `response` object:
-        console.log(JSON.stringify(response, null, 2));
+function handleInitialAuth(req, res, next) {
+    fs.readFile('credentials.json', (err, content) => {
+        if (err) return console.log('Error loading client secret file:', err);
+        // Authorize a client with credentials, then call the Google Sheets API.
+        authorize(JSON.parse(content), function () {
+            console.log(arguments)
+        });
     });
-});
+}
 
-function authorize(callback) {
-    // TODO: Change placeholder below to generate authentication credentials. See
-    // https://developers.google.com/sheets/quickstart/nodejs#step_3_set_up_the_sample
-    //
-    // Authorize using one of the following scopes:
-    //   'https://www.googleapis.com/auth/drive'
-    //   'https://www.googleapis.com/auth/drive.file'
-    //   'https://www.googleapis.com/auth/drive.readonly'
-    //   'https://www.googleapis.com/auth/spreadsheets'
-    //   'https://www.googleapis.com/auth/spreadsheets.readonly'
-    var authClient = null;
+/**
+ * Create an OAuth2 client with the given credentials, and then execute the
+ * given callback function.
+ * @param {Object} credentials The authorization client credentials.
+ * @param {function} callback The callback to call with the authorized client.
+ */
 
-    if (authClient == null) {
-        console.log('authentication failed');
-        return;
-    }
-    callback(authClient);
+function authorize(credentials, callback) {
+    const { client_secret, client_id, redirect_uris } = credentials.web;
+    const oAuth2Client = new google.auth.OAuth2(
+        client_id, client_secret, redirect_uris[0]);
+
+    // Check if we have previously stored a token.
+    fs.readFile(TOKEN_PATH, (err, token) => {
+        if (err) return getNewToken(oAuth2Client);
+        oAuth2Client.setCredentials(JSON.parse(token));
+        callback(oAuth2Client);
+    });
+}
+
+/**
+ * Get and store new token after prompting for user authorization, and then
+ * execute the given callback with the authorized OAuth2 client.
+ * @param {google.auth.OAuth2} oAuth2Client The OAuth2 client to get token for.
+ * @param {getEventsCallback} callback The callback for the authorized client.
+ */
+function getNewToken(oAuth2Client) {
+    const authUrl = oAuth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: SCOPES,
+    });
+    console.log('Authorize this app by visiting this url:', authUrl);
+    // replace prompt with redirect to authUrl 
+    // get code from query param
+    res.redirect(authUrl)
+}
+
+module.exports = {
+    handleInitialAuth
 }

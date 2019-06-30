@@ -2,3 +2,4 @@
 /testData/
 .env
 credentials.json
+token.json
