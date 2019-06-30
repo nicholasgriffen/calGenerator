@@ -4,8 +4,10 @@ const PORT = process.env.PORT || 3000;
 
 const app = express();
 
-app.get('/', api.handleInitialAuth)
+app.get('/', api.handleInitialAuth, api.getNewToken)
 
+// Google API will redirect to this URL 
+// with a query param code
 app.get('/auth/', function (req, res, next) {
     var code = req.params.code
     oAuth2Client.getToken(code, (err, token) => {

@@ -10,8 +10,9 @@ function handleInitialAuth(req, res, next) {
     fs.readFile('credentials.json', (err, content) => {
         if (err) return console.log('Error loading client secret file:', err);
         // Authorize a client with credentials, then call the Google Sheets API.
-        authorize(JSON.parse(content), function () {
-            console.log(arguments)
+        authorize(JSON.parse(content), function (client) {
+            req.oAuth2Client = client;
+            next();
         });
     });
 }
@@ -24,6 +25,7 @@ function handleInitialAuth(req, res, next) {
  */
 
 function authorize(credentials, callback) {
+    console.log(credentials)
     const { client_secret, client_id, redirect_uris } = credentials.web;
     const oAuth2Client = new google.auth.OAuth2(
         client_id, client_secret, redirect_uris[0]);
@@ -42,17 +44,18 @@ function authorize(credentials, callback) {
  * @param {google.auth.OAuth2} oAuth2Client The OAuth2 client to get token for.
  * @param {getEventsCallback} callback The callback for the authorized client.
  */
-function getNewToken(oAuth2Client) {
-    const authUrl = oAuth2Client.generateAuthUrl({
+function getNewToken(req, res, next) {
+    const authUrl = req.oAuth2Client.generateAuthUrl({
         access_type: 'offline',
         scope: SCOPES,
     });
-    console.log('Authorize this app by visiting this url:', authUrl);
+    console.log('Redirecting to: ', authUrl);
     // replace prompt with redirect to authUrl 
     // get code from query param
-    res.redirect(authUrl)
+    res.redirect(authUrl);
 }
 
 module.exports = {
-    handleInitialAuth
+    handleInitialAuth,
+    getNewToken
 }
