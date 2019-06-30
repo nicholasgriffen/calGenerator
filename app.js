@@ -8,14 +8,18 @@ app.get('/', api.setGlobalAuthClient, api.getNewToken)
 
 // Google API will redirect to this URL 
 // with a query param code
-app.get('/auth/', api.handleInboundAuthRedirect)
+app.get('/auth', api.handleInboundAuthRedirect)
+
+app.use(function (req, res, next) {
+    next({ status: 404, message: "No routes found" })
+})
 
 app.use(function (err, req, res, next) {
-    res.status = err.status || '500'
+    res.status = err.status || 500
     res.json({
         status: res.status,
         error: err,
-        message: "Something went terribly wrong"
+        message: err.message || "Something went terribly wrong"
     })
 })
 
