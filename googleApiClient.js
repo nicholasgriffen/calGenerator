@@ -7,13 +7,12 @@ const SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
 const TOKEN_PATH = 'token.json';
 
 function handleInitialAuth(req, res, next) {
-    fs.readFile('credentials.json', (err, content) => {
-        if (err) return console.log('Error loading client secret file:', err);
-        // Authorize a client with credentials, then call the Google Sheets API.
-        authorize(JSON.parse(content), function (client) {
+        // Authorize a client with credentials from the environment
+    var { client_secret, client_id, redirect_uris } = process.env; 
+    
+    authorize({ client_secret, client_id, redirect_uris }, function (client) {
             req.oAuth2Client = client;
             next();
-        });
     });
 }
 
@@ -25,8 +24,7 @@ function handleInitialAuth(req, res, next) {
  */
 
 function authorize(credentials, callback) {
-    console.log(credentials)
-    const { client_secret, client_id, redirect_uris } = credentials.web;
+    const { client_secret, client_id, redirect_uris } = credentials;
     const oAuth2Client = new google.auth.OAuth2(
         client_id, client_secret, redirect_uris[0]);
 
