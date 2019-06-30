@@ -10,4 +10,13 @@ app.get('/', api.setGlobalAuthClient, api.getNewToken)
 // with a query param code
 app.get('/auth/', api.handleInboundAuthRedirect)
 
+app.use(function (err, req, res, next) {
+    res.status = err.status || '500'
+    res.json({
+        status: res.status,
+        error: err,
+        message: "Something went terribly wrong"
+    })
+})
+
 app.listen(PORT, () => console.log('listening on ' + PORT))

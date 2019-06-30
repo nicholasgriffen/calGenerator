@@ -2,7 +2,6 @@ const { google } = require('googleapis');
 const fs = require('fs')
 const sheets = google.sheets('v4');
 
-
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
 const TOKEN_PATH = 'token.json';
 
@@ -34,12 +33,6 @@ function authorize(credentials, callback) {
     return callback(oAuth2Client);
 }
 
-/**
- * Get and store new token after prompting for user authorization, and then
- * execute the given callback with the authorized OAuth2 client.
- * @param {google.auth.OAuth2} oAuth2Client The OAuth2 client to get token for.
- * @param {getEventsCallback} callback The callback for the authorized client.
- */
 function getNewToken(req, res, next) {
     const authUrl = oAuth2Client.generateAuthUrl({
         access_type: 'offline',
@@ -53,7 +46,7 @@ function getNewToken(req, res, next) {
 function handleInboundAuthRedirect(req, res, next) {
     var code = req.query.code
     oAuth2Client.getToken(code, (err, token) => {
-        if (err) return console.error('Error while trying to retrieve access token', err);
+        if (err) next(`Error while trying to retrieve access token ${err}`);
         oAuth2Client.setCredentials(token);
         res.sendStatus(200)
     });
