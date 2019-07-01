@@ -6,7 +6,7 @@ const app = express();
 
 app.use(express.static('public'));
 
-app.get('/search', api.setGlobalAuthClient, api.getNewToken)
+app.get('/search', api.setGlobalSpredsheetId, api.setGlobalAuthClient, api.getNewToken)
 
 app.get('/auth', api.handleInboundAuthRedirect)
 
