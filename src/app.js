@@ -4,7 +4,9 @@ const PORT = process.env.PORT || 3000;
 
 const app = express();
 
-app.get('/', api.setGlobalAuthClient, api.getNewToken)
+app.use(express.static('public'));
+
+app.get('/search', api.setGlobalAuthClient, api.getNewToken)
 
 app.get('/auth', api.handleInboundAuthRedirect)
 
