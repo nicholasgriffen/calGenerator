@@ -8,13 +8,11 @@ const TOKEN_PATH = 'token.json';
 var oAuth2Client;
 
 function setGlobalAuthClient(req, res, next) {
-    fs.readFile('credentials.json', (err, content) => {
-        if (err) return console.log('Error loading client secret file:', err);
-        // Authorize a client with credentials, then call the Google Sheets API.
-        authorize(JSON.parse(content), function (client) {
-            oAuth2Client = client;
-            next();
-        });
+     var { client_secret, client_id, redirect_uris } = process.env; 
+     
+    authorize({ client_secret, client_id, redirect_uris }, function (client) {
+        oAuth2Client = client;
+        next();
     });
 }
 
@@ -25,8 +23,7 @@ function setGlobalAuthClient(req, res, next) {
  * @param {function} callback The callback to call with the authorized client.
  */
 
-function authorize(credentials, callback) {
-    const { client_secret, client_id, redirect_uris } = credentials.web;
+function authorize({ client_secret, client_id, redirect_uris }, callback) {
     const oAuth2Client = new google.auth.OAuth2(
         client_id, client_secret, redirect_uris[0]);
 
