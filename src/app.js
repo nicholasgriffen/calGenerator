@@ -1,14 +1,17 @@
 const express = require('express');
-const api = require('../lib/googleApiClient');
+const { setGlobalSpreadsheetId,
+    setGlobalAuthClient,
+    getNewToken,
+    handleInboundAuthRedirect } = require('../lib/googleApiClient');
 const PORT = process.env.PORT || 3000;
 
 const app = express();
 
 app.use(express.static('public'));
 
-app.get('/search', api.setGlobalSpredsheetId, api.setGlobalAuthClient, api.getNewToken)
+app.get('/search', setGlobalSpreadsheetId, setGlobalAuthClient, getNewToken)
 
-app.get('/auth', api.handleInboundAuthRedirect)
+app.get('/auth', handleInboundAuthRedirect)
 
 app.use(function (req, res, next) {
     next({ status: 404, message: "No routes found" })
