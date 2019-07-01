@@ -7,7 +7,7 @@ const { setGlobalSpreadsheetId,
     getNewToken,
     handleInboundAuthRedirect,
     getSpreadsheetValues,
-    sendCsv } = require('../lib/googleApiClient');
+    sendCsvToCalendar } = require('../lib/googleApiClient');
 const { makeCsv } = require('../lib/csv')
 
 const PORT = process.env.PORT || 3000;
@@ -18,7 +18,7 @@ app.use(express.static('public'));
 
 app.get('/search', setGlobalSpreadsheetId, setGlobalStartDate, setGlobalAuthClient, getNewToken)
 
-app.get('/auth', handleInboundAuthRedirect, getSpreadsheetValues, makeCsv, sendCsv)
+app.get('/auth', handleInboundAuthRedirect, getSpreadsheetValues, makeCsv, sendCsvToCalendar)
 
 app.use(function (req, res, next) {
     next({ status: 404, message: "No routes found" })
