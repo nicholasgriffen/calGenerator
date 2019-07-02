@@ -4,6 +4,7 @@ const express = require('express');
 const { setGlobalSpreadsheetId,
     setGlobalAuthClient,
     setGlobalStartDate,
+    setGlobalCohorts,
     getNewToken,
     handleInboundAuthRedirect,
     getSpreadsheetValues,
@@ -16,7 +17,7 @@ const app = express();
 
 app.use(express.static('public'));
 
-app.get('/search', setGlobalSpreadsheetId, setGlobalStartDate, setGlobalAuthClient, getNewToken)
+app.get('/search', setGlobalSpreadsheetId, setGlobalStartDate, setGlobalCohorts, setGlobalAuthClient, getNewToken)
 
 app.get('/auth', handleInboundAuthRedirect, getSpreadsheetValues, makeCsv, sendCsvToCalendar)
 
