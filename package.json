@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "src/app.js",
+  "engines": {
+    "node": "11.x"
+  },
   "scripts": {
     "dev": "npx nodemon src/app.js",
     "start": "node src/app.js"
