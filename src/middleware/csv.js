@@ -22,25 +22,32 @@ function parseStreamIntoEvents(stream, startDate) {
 	while (record = stream.read()) {
         
 		day = +record['Day'] || day
-		week = record['Week'] ? +record['Week'].split(' ')[1] : week // Expect format like "Week":"Week 01";
-        
+		week = record['Week'] ? record['Week'].split(' ')[1] : week // Expect format like "Week":"Week 01";
 		if (week > 6) {
 			cohort = 'senior'
-			weekModifier = week - 6
+			weekModifier = +week - 6
 		} else {
 			cohort = 'junior'
-			weekModifier = week
-        
+			weekModifier = +week
 		}
 		
-		if (record['Sprint'] && !sprint) {
-			sprint = new Sprint(day, weekModifier, date, record['Sprint'])
-		} else if (record['Sprint'] && sprint.name !== record['Sprint']) {
-			sprint.updateEndDate(day - 1)
+		if (record['Sprint']) {
+			if (!sprint) {
+				sprint = new Sprint(day, weekModifier, date, record['Sprint'])
+			} else if (day === 6) {
+				sprint.updateEndDate(weekModifier, 7)
+				output[cohort].push(sprint)
+				sprint = null 
+			} else if (sprint.name !== record['Sprint'] ) {
+				sprint.updateEndDate(weekModifier, day)
+				output[cohort].push(sprint)
+				sprint = new Sprint(day, weekModifier, date, record['Sprint'])
+			}
+		} else if (sprint && day === 6) {
+			sprint.updateEndDate(weekModifier, 7)
 			output[cohort].push(sprint)
-			sprint = new Sprint(day, weekModifier, date, record['Sprint'])
+			sprint = null 
 		}
-
 		output[cohort].push(new CalendarEvent(day, weekModifier, date, record))
 	}
 	return output

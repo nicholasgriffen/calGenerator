@@ -16,40 +16,30 @@ function Sprint(day, weekModifier, startDate, name) {
 
 	this.name = name
 	this.startDate = startDate 
-	this.weekModifier = weekModifier
 	
 	setStartDate(this, calculateDate(startDate, weekModifier, day))
 	setEndDate(this, calculateDate(startDate, weekModifier, day))
 	setSubject(this, name)
 }
 
-Sprint.prototype.updateEndDate = function(endDay) {
-	setEndDate(this, calculateDate(this.startDate, this.weekModifier, endDay))
-	setStartAndEndTime(this, formatTimes({Time: "9:00AM-5:30PM"}))
+Sprint.prototype.updateEndDate = function(endWeek, endDay) {
+	setEndDate(this, calculateDate(this.startDate, endWeek, endDay))
 }
 
 function setStartDate(event, date) {
 	event.csv['Start Date'] = date.toLocaleDateString()
-	event.api.start.dateTime = `${date.getFullYear()}-${date.getMonth() < 9 ? `0${date.getMonth() + 1}` : date.getMonth() + 1}-${date.getDate()}T`
+	event.api.start.date = `${date.getFullYear()}-${date.getMonth() < 9 ? `0${date.getMonth() + 1}` : date.getMonth() + 1}-${date.getDate()}`
 }
 
 function setEndDate(event, date) {
 	event.csv['End Date'] = date.toLocaleDateString()
-	event.api.end.dateTime = `${date.getFullYear()}-${date.getMonth() < 9 ? `0${date.getMonth() + 1}` : date.getMonth() + 1}-${date.getDate()}T`
+	event.api.end.date = `${date.getFullYear()}-${date.getMonth() < 9 ? `0${date.getMonth() + 1}` : date.getMonth() + 1}-${date.getDate()}`
 
-}
-
-function setStartAndEndTime(event, times) {
-	event.csv['Start Time'] = times.start.short
-	event.csv['End Time'] = times.end.short
-
-	event.api.start.dateTime += times.start.long
-	event.api.end.dateTime += times.end.long
 }
 
 function setSubject(event, subject) {
-	event.api['summary'] = subject
-	event.csv['Subject'] = subject
+	event.api['summary'] = `Big Picture: ${subject}`
+	event.csv['Subject'] = `Big Picture: ${subject}`
 }
 
 module.exports = Sprint
