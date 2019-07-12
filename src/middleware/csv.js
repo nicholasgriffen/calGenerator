@@ -9,7 +9,10 @@ const parseOptions = {
 	skip_lines_with_error: true
 }
 
-const headerRow = 'Start Date,End Date,Start Time,End Time,Subject\n'
+const stringifyOptions = {
+    header: true,
+    columns: ["Start Date", "End Date", "Start Time", "End Time", "Subject"]
+}
 
 function parseStreamIntoEvents(stream, startDate) {
 	const date = new Date(startDate)
@@ -46,9 +49,9 @@ function parseStreamIntoEvents(stream, startDate) {
 
 function createEventObjectsAndCsvs(success, failure, date, stream) { 
 	var convertedData = parseStreamIntoEvents(stream, new Date(date))
-	stringify(convertedData.senior.map(event => event.csv), (err, seniorData) => {
+	stringify(convertedData.senior.map(event => event.csv), stringifyOptions, (err, seniorData) => {
 		if (err) return failure(err)
-		stringify(convertedData.junior.map(event => event.csv), (err, juniorData) => {
+		stringify(convertedData.junior.map(event => event.csv), stringifyOptions, (err, juniorData) => {
 			if (err) return failure(err)
 			return success({
 				csv: {
@@ -91,15 +94,15 @@ module.exports = {
 			parsedSheets.forEach(sheet => {
 				req.calendar.senior.push(sheet.api.senior)
 				req.calendar.junior.push(sheet.api.junior)
-				req.csv.junior.push(sheet.csv.junior)
-				req.csv.senior.push(sheet.csv.senior)
+				req.csv.junior.push(sheet.csv.junior.replace(/Start Date\,End Date\,Start Time\,End Time\,Subject(\n)?/g, ""))
+				req.csv.senior.push(sheet.csv.senior.replace(/Start Date\,End Date\,Start Time\,End Time\,Subject(\n)?/g, ""))
 			})
 
 			req.calendar.senior = req.calendar.senior.flat()
 			req.calendar.junior = req.calendar.junior.flat()
 
-			req.csv.senior = req.csv.senior.reduce((acc, val) => acc + val, headerRow)
-			req.csv.junior = req.csv.junior.reduce((acc, val) => acc + val, headerRow)
+			req.csv.senior = req.csv.senior.reduce((acc, val) => acc + val, "Start Date,End Date,Start Time,End Time,Subject\n")
+			req.csv.junior = req.csv.junior.reduce((acc, val) => acc + val, "Start Date,End Date,Start Time,End Time,Subject\n")
 
 			next()
 
