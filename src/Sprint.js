@@ -15,6 +15,7 @@ function Sprint(day, weekModifier, startDate, name) {
 	}
 
 	this.name = name
+	this.startDate = startDate 
 	this.weekModifier = weekModifier
 	
 	setStartDate(this, calculateDate(startDate, weekModifier, day))
