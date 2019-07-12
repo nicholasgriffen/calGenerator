@@ -1,5 +1,5 @@
 const { parse, stringify } = require('csv')
-const CalendarEvent = require('../../lib/CalendarEvent')
+const CalendarEvent = require('../CalendarEvent')
 const Sprint = require('../Sprint')
 
 const parseOptions = {
@@ -12,9 +12,8 @@ const parseOptions = {
 const headerRow = 'Start Date,End Date,Start Time,End Time,Subject\n'
 
 function parseStreamIntoEvents(stream, startDate) {
-    var output = { senior: [], junior: [] }
-    var sprint = {endDate: null}
-	let record, day, cohort, week, weekModifier
+	var output = { senior: [], junior: [] }
+	let record, day, cohort, week, weekModifier, sprint
     
 	while (record = stream.read()) {
         
@@ -28,10 +27,14 @@ function parseStreamIntoEvents(stream, startDate) {
 			cohort = 'junior'
 			weekModifier = week
         
-        }
-        
-		if (record['Sprint'] && sprint) {
-            new Sprint(record['Sprint'])
+		}
+		
+		if (record['Sprint'] && !sprint) {
+			sprint = new Sprint(day, weekModifier, startDate, record['Sprint'])
+		} else if (record['Sprint'] && sprint.name !== record['Sprint']) {
+			sprint.updateEndDate(day - 1)
+			output[cohort].push(sprint)
+			sprint = new Sprint(day, weekModifier, startDate, record['Sprint'])
 		}
 
 		output[cohort].push(new CalendarEvent(day, weekModifier, startDate, record))
