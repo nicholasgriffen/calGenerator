@@ -12,6 +12,7 @@ const parseOptions = {
 const headerRow = 'Start Date,End Date,Start Time,End Time,Subject\n'
 
 function parseStreamIntoEvents(stream, startDate) {
+	const date = new Date(startDate)
 	var output = { senior: [], junior: [] }
 	let record, day, cohort, week, weekModifier, sprint
     
@@ -30,14 +31,14 @@ function parseStreamIntoEvents(stream, startDate) {
 		}
 		
 		if (record['Sprint'] && !sprint) {
-			sprint = new Sprint(day, weekModifier, startDate, record['Sprint'])
+			sprint = new Sprint(day, weekModifier, date, record['Sprint'])
 		} else if (record['Sprint'] && sprint.name !== record['Sprint']) {
 			sprint.updateEndDate(day - 1)
 			output[cohort].push(sprint)
-			sprint = new Sprint(day, weekModifier, startDate, record['Sprint'])
+			sprint = new Sprint(day, weekModifier, date, record['Sprint'])
 		}
 
-		output[cohort].push(new CalendarEvent(day, weekModifier, startDate, record))
+		output[cohort].push(new CalendarEvent(day, weekModifier, date, record))
 	}
 	return output
 }
