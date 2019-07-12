@@ -8,8 +8,8 @@ const { setGlobalSpreadsheetId,
     getNewToken,
     handleInboundAuthRedirect,
     getSpreadsheetValues,
-    sendCsvToCalendar } = require('../lib/googleApiClient');
-const { makeCsv } = require('../lib/csv')
+    sendCsvToCalendar } = require('./middleware/googleApiClient');
+const { makeCsv } = require('./middleware/csv')
 
 const PORT = process.env.PORT || 3000;
 
